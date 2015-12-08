@@ -558,17 +558,16 @@
      */
     function getColumnsHeights(cols) {
       var columnsHeights = [];
-      var i;
-      for (i in cols) {
+      cols.forEach(function(col) {
         var h;
-        if (cols[i].length) {
-          var lastItem = cols[i][cols[i].length - 1];
+        if (col.length) {
+          var lastItem = col[col.length - 1];
           h = lastItem.y + lastItem.height;
         } else {
           h = 0;
         }
         columnsHeights.push(h);
-      }
+      });
       return columnsHeights;
     }
 
@@ -635,13 +634,22 @@
                                                                colSize);
 
         // We place the item in the found columns
-        for (j in itemColumnsAndPosition.columns) {
-          columns[itemColumnsAndPosition.columns[j]].push(items[i]);
-        }
+        // itemColumnsAndPosition.columns.forEach(function(column) {
+        //   columns[column].push(items[i]);
+        // });
+/*jshint loopfunc:true */
+        itemColumnsAndPosition.columns.forEach(function(column) {
+          columns[column].push(items[i]);
+
+        });
 
         items[i].x = itemColumnsAndPosition.position.x;
         items[i].y = itemColumnsAndPosition.position.y;
       }
+    }
+
+    function placeItemsInColumn(item, column) {
+      column.push(item);
     }
 
     /*

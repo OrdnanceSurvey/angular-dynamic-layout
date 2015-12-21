@@ -25,19 +25,25 @@
       },
       template: function(element, attrs) {
         var trackby = attrs.trackby ? ' track by ' + attrs.trackby : '';
+        var itemClass = attrs.itemClass || 'dynamic-layout-item-parent';
+
         return '<div                                                    \
-                    class="dynamic-layout-item-parent"                  \
+                    class="' + itemClass + '"                           \
                     ng-repeat="it in items |                            \
                                customFilter: filters |                  \
                                customRanker:rankers |                   \
                                as:this:\'filteredItems\'' + trackby + '"\
                     ng-include="it.template || defaulttemplate"         \
+                    ng-class="it.getNgClass()"                          \
                 ></div>';
       },
       link: link
     };
 
-    function link(scope, element) {
+    function link(scope, element, iAttrs) {
+
+      // Keep hold of the itemClass value so we can pass it to the PositionService later
+      scope.itemClass = iAttrs.itemClass || 'dynamic-layout-item-parent';
 
       // Keep count of the number of templates left to load
       scope.templatesToLoad = 0;
@@ -118,7 +124,7 @@
         } else {
           width = rect.right - rect.left;
         }
-        return PositionService.layout(width);
+        return PositionService.layout(width, scope.itemClass);
       }
 
       /*

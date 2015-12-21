@@ -32,19 +32,25 @@
       },
       template: function(element, attrs) {
         var trackby = attrs.trackby ? ' track by ' + attrs.trackby : '';
+        var itemClass = attrs.itemClass || 'dynamic-layout-item-parent';
+
         return '<div                                                    \
-                    class="dynamic-layout-item-parent"                  \
+                    class="' + itemClass + '"                           \
                     ng-repeat="it in items |                            \
                                customFilter: filters |                  \
                                customRanker:rankers |                   \
                                as:this:\'filteredItems\'' + trackby + '"\
                     ng-include="it.template || defaulttemplate"         \
+                    ng-class="it.getNgClass()"                          \
                 ></div>';
       },
       link: link
     };
 
-    function link(scope, element) {
+    function link(scope, element, iAttrs) {
+
+      // Keep hold of the itemClass value so we can pass it to the PositionService later
+      scope.itemClass = iAttrs.itemClass || 'dynamic-layout-item-parent';
 
       // Keep count of the number of templates left to load
       scope.templatesToLoad = 0;
@@ -125,7 +131,7 @@
         } else {
           width = rect.right - rect.left;
         }
-        return PositionService.layout(width);
+        return PositionService.layout(width, scope.itemClass);
       }
 
       /*
@@ -384,13 +390,14 @@
 
     /*
      * Get the items heights and width from the DOM
+     * @param itemClass: the classname of item elements
      * @return: the list of items with their sizes
      */
-    function getItemsDimensionFromDOM() {
+    function getItemsDimensionFromDOM(itemClass) {
       // not(.ng-leave) : we don't want to select elements that have been
       // removed but are  still in the DOM
       elements = $document[0].querySelectorAll(
-        '.dynamic-layout-item-parent:not(.ng-leave)'
+        '.' + itemClass + ':not(.ng-leave)'
       );
       items = [];
       for (var i = 0; i < elements.length; ++i) {
@@ -509,11 +516,12 @@
     /*
      * Apply the position service on the elements in the DOM
      * @param containerWidth: the width of the dynamic-layout container
+     * @param itemClass: the classname of item elements
      * @return: the promise of the position animations being completed
      */
-    function layout(containerWidth) {
+    function layout(containerWidth, itemClass) {
       // We first gather the items dimension based on the DOM elements
-      items = self.getItemsDimensionFromDOM();
+      items = self.getItemsDimensionFromDOM(itemClass);
 
       // Then we get the column size base the elements minimum width
       var colSize = getColSize();

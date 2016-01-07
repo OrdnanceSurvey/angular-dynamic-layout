@@ -107,7 +107,7 @@
 
         animationPromise.then(function() {
           // We remove the class so that the animation can be ran again
-          element.classList.remove('move-items-animation');
+          angular.element(element).removeClass('move-items-animation');
           delete ongoingAnimations[i];
         });
 
